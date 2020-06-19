@@ -7,9 +7,8 @@ import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import ws.slink.bean.TimeRecordAggregationStrategy;
+import ws.slink.bean.PointAggregationStrategy;
 import ws.slink.bean.PointBatchBean;
-import ws.slink.bean.PointRemover;
 import ws.slink.bean.TimeRecordToPointConverter;
 import ws.slink.config.AppConfig;
 
@@ -18,7 +17,6 @@ import ws.slink.config.AppConfig;
 public class TimeRecordProcessing extends RouteBuilder {
 
     private final @NonNull AppConfig appConfig;
-    private final @NonNull PointRemover pointRemover;
 
     @Value("${influxdb.db}") String influxDb;
 
@@ -30,15 +28,14 @@ public class TimeRecordProcessing extends RouteBuilder {
             .handled(true)
         ;
         from("seda:saveToInflux")
-            .log(LoggingLevel.TRACE, log.getName(), "${body}")
-            .aggregate(constant(true), new TimeRecordAggregationStrategy())
+            .log(LoggingLevel.INFO, log.getName(), "${body}")
+            .bean(TimeRecordToPointConverter.class)
+            .aggregate(constant(true), new PointAggregationStrategy())
             .completionTimeout(appConfig.batchTime())
             .completionSize(appConfig.batchSize())
             .forceCompletionOnStop()
-            .bean(pointRemover)
-            .bean(TimeRecordToPointConverter.class)
             .bean(PointBatchBean.class, "build")
-////            .bean(PointBatchBean.class, "print")
+//            .bean(PointBatchBean.class, "print")
             .log(LoggingLevel.INFO, log.getName(), "SAVE TO INFLUX    : ${body}")
             .to("influxdb://influxClient?databaseName=" + influxDb + "&retentionPolicy=autogen&batch=true")
             .log(LoggingLevel.INFO, log.getName(), "INFLUX SAVE RESULT: ${body}")

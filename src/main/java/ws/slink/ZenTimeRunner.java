@@ -8,7 +8,6 @@ import org.apache.camel.FluentProducerTemplate;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -16,11 +15,11 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import org.zendesk.client.v2.model.Audit;
-import org.zendesk.client.v2.model.CustomFieldValue;
 import org.zendesk.client.v2.model.Ticket;
 import org.zendesk.client.v2.model.User;
 import org.zendesk.client.v2.model.events.ChangeEvent;
 import org.zendesk.client.v2.model.events.Event;
+import ws.slink.bean.PointRemover;
 import ws.slink.config.AppConfig;
 import ws.slink.model.TimeRecord;
 import ws.slink.tools.TimeUtils;
@@ -29,7 +28,10 @@ import ws.slink.zendesk.ZendeskFacade;
 import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -41,6 +43,7 @@ public class ZenTimeRunner implements CommandLineRunner, ApplicationContextAware
     private final @NonNull AppConfig appConfig;
     private final @NonNull ZendeskFacade zendeskFacade;
     private final @NonNull CamelContext camelContext;
+    private final @NonNull PointRemover pointRemover;
 
     private ConfigurableApplicationContext applicationContext;
     private FluentProducerTemplate producerTemplate;
@@ -59,7 +62,7 @@ public class ZenTimeRunner implements CommandLineRunner, ApplicationContextAware
         if (StringUtils.isBlank(offset) || offset.equals("*") || offset.equals("all")) {
             return "type:ticket";
         } else {
-            Instant startTime = TimeUtils.offset(Instant.now(), "-10d");
+            Instant startTime = TimeUtils.roundTo(TimeUtils.offset(Instant.now(), "-10d"), TimeUtils.OffsetUnit.DAY);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             return "type:ticket updated>" + sdf.format(new Date(startTime.toEpochMilli()));
         }
@@ -124,6 +127,7 @@ public class ZenTimeRunner implements CommandLineRunner, ApplicationContextAware
         if (!checkConfiguration()) {
             printUsage();
         } else {
+            pointRemover.remove(zendeskFacade.searchTickets(ticketsQuery(appConfig.offsetStr())));
             zendeskFacade.searchTickets(ticketsQuery(appConfig.offsetStr()))
                 .forEach(t -> {
                     zendeskFacade.getAudits(t)

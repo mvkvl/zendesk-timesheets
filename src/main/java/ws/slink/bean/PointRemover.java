@@ -8,6 +8,7 @@ import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.zendesk.client.v2.model.Ticket;
 import ws.slink.config.AppConfig;
 import ws.slink.model.TimeRecord;
 
@@ -22,10 +23,10 @@ public class PointRemover {
     private final @NonNull InfluxDB influxDB;
     private final @NonNull AppConfig appConfig;
 
-    public void remove(List<TimeRecord> timeRecords) {
+    public void remove(List<Ticket> timeRecords) {
         String where = timeRecords
             .stream()
-            .map(t -> t.getTicketId())
+            .map(t -> t.getId())
             .distinct()
             .map(id -> "ticketId='" + id + "'")
             .collect(Collectors.joining(" OR "));
