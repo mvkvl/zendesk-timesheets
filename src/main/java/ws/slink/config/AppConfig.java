@@ -27,8 +27,17 @@ import ws.slink.tools.TimeUtils;
 @Accessors(fluent = true)
 public class AppConfig {
 
+    @Value("${report.priority-field}")
+    private String priorityField;
+
     @Value("${report.time-field}")
     private String timeField;
+
+    @Value("${report.topic-field}")
+    private String topicField;
+
+    @Value("${report.app-field}")
+    private String appField;
 
     @Value("${report.offset}")
     private String offsetStr;
@@ -49,6 +58,9 @@ public class AppConfig {
         System.out.println("zendesk user   : " + user);
         System.out.println("zendesk token  : " + token);
         System.out.println("dry run        : " + dryRun);
+        System.out.println("app field      : " + appField);
+        System.out.println("topic field    : " + topicField);
+        System.out.println("priority field : " + priorityField);
         System.out.println("time field     : " + timeField);
         System.out.println("time offset    : " + offsetStr);
         System.out.println("time since     : " + TimeUtils.timeString(TimeUtils.offset(offsetStr)));

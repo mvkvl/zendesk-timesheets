@@ -15,6 +15,10 @@ public class TimeRecordToPointConverter {
             .addField("seconds", timeRecord.getSeconds())
             .tag("ticketId", timeRecord.getTicketId().toString())
             .tag("employee", timeRecord.getEmployee())
+            .tag("priority", timeRecord.getPriority())
+            .tag("type", timeRecord.getType())
+            .tag("topic", timeRecord.getTopic())
+            .tag("app", timeRecord.getApp())
             .time(timeRecord.getDate().toEpochMilli(), TimeUnit.MILLISECONDS)
             .build()
         ;

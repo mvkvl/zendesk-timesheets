@@ -11,8 +11,12 @@ public class TimeRecord {
 
     Long    ticketId;
     String  employee;
-    Instant date;
+    String  priority;
     Long     seconds;
+    String     topic;
+    String      type;
+    String       app;
+    Instant     date;
 
     public TimeRecord ticketId(Long value) {
         this.ticketId = value;
@@ -22,12 +26,28 @@ public class TimeRecord {
         this.employee = value;
         return this;
     }
-    public TimeRecord date(Instant value) {
-        this.date = value;
+    public TimeRecord priority(String value) {
+        this.priority = value;
         return this;
     }
     public TimeRecord seconds(Long value) {
         this.seconds = value;
+        return this;
+    }
+    public TimeRecord topic(String value) {
+        this.topic = value;
+        return this;
+    }
+    public TimeRecord date(Instant value) {
+        this.date = value;
+        return this;
+    }
+    public TimeRecord type(String value) {
+        this.type = value;
+        return this;
+    }
+    public TimeRecord app(String value) {
+        this.app = value;
         return this;
     }
 

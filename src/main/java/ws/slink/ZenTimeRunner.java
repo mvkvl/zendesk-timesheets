@@ -16,6 +16,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import org.zendesk.client.v2.model.Audit;
+import org.zendesk.client.v2.model.CustomFieldValue;
 import org.zendesk.client.v2.model.Ticket;
 import org.zendesk.client.v2.model.User;
 import org.zendesk.client.v2.model.events.ChangeEvent;
@@ -28,10 +29,8 @@ import ws.slink.zendesk.ZendeskFacade;
 import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Date;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.TimeZone;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -73,14 +72,33 @@ public class ZenTimeRunner implements CommandLineRunner, ApplicationContextAware
         }
         return false;
     }
+    private String getTicketType(Ticket t) {
+        return (null == t.getType())
+             ? "none"
+             : t.getType().name()
+        ;
+    }
+    private String getCustomFieldValue(Ticket ticket, String fieldId) {
+        return ticket.getCustomFields()
+            .stream()
+            .filter(cfv -> fieldId.equals(cfv.getId().toString()))
+            .findFirst()
+            .map(cfv -> Arrays.asList(cfv.getValue()).stream().collect(Collectors.joining(", ")))
+            .orElse("")
+        ;
+    }
     private TimeRecord createTimeRecord(Ticket ticket, Audit audit, ChangeEvent change) {
         Optional<User> user = zendeskFacade.getUser(audit.getAuthorId());
         if (user.isPresent()) {
             return new TimeRecord()
                 .date(audit.getCreatedAt().toInstant())
-                .employee(user.get().getName())
-                .ticketId(ticket.getId())
                 .seconds(Long.valueOf(change.getValueObject().toString()))
+                .employee(user.get().getName())
+                .priority(getCustomFieldValue(ticket, appConfig.priorityField()))
+                .ticketId(ticket.getId())
+                .type(getTicketType(ticket))
+                .topic(getCustomFieldValue(ticket, appConfig.topicField()))
+                .app(getCustomFieldValue(ticket, appConfig.appField()))
             ;
         } else {
             log.warn("could not get user from zendesk");
