@@ -1,0 +1,31 @@
+#server:
+#  port: 8088
+
+zendesk:
+  max-attempts: 5
+
+report:
+  timeField: "360043408493"
+  offset: "-2w"
+
+spring:
+  main:
+    banner-mode: "off"
+  profiles:
+    active: main
+
+influxdb:
+  proto: http
+  host: ${INFLUXDB_HOST:localhost}
+  port: ${INFLUXDB_PORT:8086}
+  user: ${INFLUXDB_USER:influx}
+  pass: ${INFLUXDB_PASSWORD:pass}
+  batchSize: 10
+  batchTime: 10000
+  db: zendesk_data
+
+logging:
+  level:
+    root: WARN
+    org.zendesk: ${LOGLEVEL:INFO}
+    ws.slink: ${LOGLEVEL:INFO}
