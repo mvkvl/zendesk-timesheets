@@ -48,6 +48,9 @@ public class AppConfig {
     @Value("${influxdb.batch-time}")
     private int batchTime;
 
+    @Value("${influxdb.db}")
+    private String influxDb;
+
     private String  url;
     private String  user;
     private String  token;

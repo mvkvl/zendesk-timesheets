@@ -23,8 +23,8 @@ influxdb:
   port         : ${INFLUXDB_PORT:8086}
   user         : ${INFLUXDB_USER:influx}
   pass         : ${INFLUXDB_PASSWORD:pass}
-  batchSize    : 10
-  batchTime    : 10000
+  batchSize    : ${INFLUXDB_BATCH_SIZE:50}
+  batchTime    : ${INFLUXDB_BATCH_TIME:15000}
   db           : zendesk_data
 
 logging:

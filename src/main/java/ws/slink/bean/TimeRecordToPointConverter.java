@@ -4,12 +4,22 @@ import org.influxdb.dto.Point;
 import org.springframework.stereotype.Component;
 import ws.slink.model.TimeRecord;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Component
 public class TimeRecordToPointConverter {
 
-    public Point documentToPoint(TimeRecord timeRecord) {
+    public List<Point> timeRecordsToPoint(List<TimeRecord> timeRecords) {
+        return timeRecords
+            .stream()
+            .map(this::timeRecordToPoint)
+            .collect(Collectors.toList())
+        ;
+    }
+
+    private Point timeRecordToPoint(TimeRecord timeRecord) {
         return Point
             .measurement("time-log")
             .addField("seconds", timeRecord.getSeconds())
@@ -23,5 +33,4 @@ public class TimeRecordToPointConverter {
             .build()
         ;
     }
-
 }
