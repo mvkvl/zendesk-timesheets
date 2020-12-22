@@ -127,7 +127,9 @@ public class ZenTimeRunner implements CommandLineRunner, ApplicationContextAware
         if (!checkConfiguration()) {
             printUsage();
         } else {
-            pointRemover.remove(zendeskFacade.searchTickets(ticketsQuery(appConfig.offsetStr())));
+            if (!appConfig.dryRun()) {
+                pointRemover.remove(zendeskFacade.searchTickets(ticketsQuery(appConfig.offsetStr())));
+            }
             zendeskFacade.searchTickets(ticketsQuery(appConfig.offsetStr()))
                 .forEach(t -> {
                     zendeskFacade.getAudits(t)
